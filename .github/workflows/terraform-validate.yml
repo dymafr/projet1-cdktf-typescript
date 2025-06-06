@@ -40,13 +40,13 @@ jobs:
       - name: Install cdktf CLI
         run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
 
-      - name: Install dependencies
-        run: npm ci && cdktf get
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+
+      - name: Install dependencies
+        run: npm ci && cdktf get
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
@@ -108,13 +108,13 @@ jobs:
       - name: Install cdktf CLI
         run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
 
-      - name: Install dependencies
-        run: npm ci && cdktf get
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+
+      - name: Install dependencies
+        run: npm ci && cdktf get
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
@@ -234,13 +234,13 @@ jobs:
       - name: Install cdktf CLI
         run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
 
-      - name: Install dependencies
-        run: npm ci && cdktf get
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+
+      - name: Install dependencies
+        run: npm ci && cdktf get
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
@@ -309,13 +309,13 @@ jobs:
       - name: Install cdktf CLI
         run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
 
-      - name: Install dependencies
-        run: npm ci && cdktf get
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+
+      - name: Install dependencies
+        run: npm ci && cdktf get
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
