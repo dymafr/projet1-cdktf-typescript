@@ -248,8 +248,19 @@ jobs:
       - name: Terraform Init
         run: terraform init -input=false
 
-      - name: Select Staging Workspace
-        run: terraform workspace select dev || terraform workspace new dev
+      - name: Determine Terraform workspace
+        id: set_workspace
+        run: |
+          # déterminer le workspace Terraform en fonction de la branche de base de la PR
+          if [ "${{ github.base_ref }}" = "main" ]; then
+            WORKSPACE=prod
+          elif [ "${{ github.base_ref }}" = "staging" ]; then
+            WORKSPACE=dev
+          else
+            WORKSPACE=dev
+          fi
+          echo "WORKSPACE=$WORKSPACE" >> $GITHUB_ENV
+          echo "tf_workspace=$WORKSPACE" >> $GITHUB_OUTPUT
 
       - name: Terraform Plan for Staging
         id: plan_staging
@@ -323,8 +334,19 @@ jobs:
       - name: Terraform Init
         run: terraform init -input=false
 
-      - name: Select Production Workspace
-        run: terraform workspace select prod || terraform workspace new prod
+      - name: Determine Terraform workspace
+        id: set_workspace
+        run: |
+          # déterminer le workspace Terraform en fonction de la branche de base de la PR
+          if [ "${{ github.base_ref }}" = "main" ]; then
+            WORKSPACE=prod
+          elif [ "${{ github.base_ref }}" = "staging" ]; then
+            WORKSPACE=dev
+          else
+            WORKSPACE=dev
+          fi
+          echo "WORKSPACE=$WORKSPACE" >> $GITHUB_ENV
+          echo "tf_workspace=$WORKSPACE" >> $GITHUB_OUTPUT
 
       - name: Terraform Plan for Production
         id: plan_prod
