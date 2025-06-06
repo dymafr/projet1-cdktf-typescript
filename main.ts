@@ -41,6 +41,9 @@ export class BaseStack extends TerraformStack {
   constructor(scope: Construct, id: string, props: BaseStackProps) {
     super(scope, id);
 
+    // spécifier la version minimale de Terraform
+    this.addOverride("terraform.required_version", ">= 1.12.1");
+
     // configuration du backend s3 pour l’état terraform
     new S3Backend(this, {
       bucket: props.backendBucket,
