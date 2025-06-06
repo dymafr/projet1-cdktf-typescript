@@ -43,13 +43,13 @@ jobs:
       - name: Install dependencies
         run: npm ci && cdktf get
 
-      - name: Synthétiser le code Terraform (HCL)
-        run: npx cdktf synth
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+
+      - name: Synthétiser le code Terraform (HCL)
+        run: npx cdktf synth
 
       - name: Terraform Init (validation mode)
         run: terraform init -backend=false -input=false
@@ -111,13 +111,13 @@ jobs:
       - name: Install dependencies
         run: npm ci && cdktf get
 
-      - name: Synthétiser le code Terraform (HCL)
-        run: npx cdktf synth
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+
+      - name: Synthétiser le code Terraform (HCL)
+        run: npx cdktf synth
 
       - name: Determine Terraform workspace
         id: set_workspace
@@ -237,13 +237,13 @@ jobs:
       - name: Install dependencies
         run: npm ci && cdktf get
 
-      - name: Synthétiser le code Terraform (HCL)
-        run: npx cdktf synth
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+
+      - name: Synthétiser le code Terraform (HCL)
+        run: npx cdktf synth
 
       - name: Terraform Init
         run: terraform init -input=false
@@ -312,13 +312,13 @@ jobs:
       - name: Install dependencies
         run: npm ci && cdktf get
 
-      - name: Synthétiser le code Terraform (HCL)
-        run: npx cdktf synth
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+
+      - name: Synthétiser le code Terraform (HCL)
+        run: npx cdktf synth
 
       - name: Terraform Init
         run: terraform init -input=false
