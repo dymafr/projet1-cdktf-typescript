@@ -32,6 +32,20 @@ jobs:
           role-to-assume: arn:aws:iam::472910743243:role/GitHubActions-Terraform-Role-Projet1 # !! remplacez par l’ARN de votre rôle !!
           aws-region: eu-west-3
 
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install cdktf CLI
+        run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
+
+      - name: Install dependencies
+        run: npm ci && cdkf get
+
+      - name: Synthétiser le code Terraform (HCL)
+        run: npx cdktf synth
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
