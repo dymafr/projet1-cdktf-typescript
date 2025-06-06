@@ -180,6 +180,11 @@ export class BaseStack extends TerraformStack {
       },
     });
 
+    new TerraformOutput(this, "web_server_public_ip", {
+      description: "IP publique du serveur web",
+      value: Fn.element(["${aws_instance.webServer.public_ip}"], 0),
+    });
+
     // si createBackendBucket=true -> on crée le bucket ; sinon on suppose qu'il existe déjà
     if (props.createBackendBucket) {
       const tfstateBucket = new S3Bucket(this, "tfstate", {
