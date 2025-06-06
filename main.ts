@@ -1,3 +1,4 @@
+// fichier : main.ts (ou stack.ts, selon votre architecture)
 import { Construct } from "constructs";
 import {
   App,
@@ -35,16 +36,17 @@ import * as path from "path";
 export interface BaseStackProps {
   readonly envName: string;
   readonly backendBucket: string;
+  readonly createBackendBucket: boolean;
 }
 
 export class BaseStack extends TerraformStack {
   constructor(scope: Construct, id: string, props: BaseStackProps) {
     super(scope, id);
 
-    // spécifier la version minimale de Terraform
+    // exiger au minimum Terraform >= 1.12.1
     this.addOverride("terraform.required_version", ">= 1.12.1");
 
-    // configuration du backend s3 pour l’état terraform
+    // configuration du backend S3 (ça pointe vers le bucket même s'il existe déjà)
     new S3Backend(this, {
       bucket: props.backendBucket,
       key: `${props.envName}/terraform.tfstate`,
@@ -69,7 +71,7 @@ export class BaseStack extends TerraformStack {
       description: "le bloc cidr pour le `vpc` principal",
     });
 
-    // provider aws avec tags par défaut
+    // provider AWS avec tags par défaut
     new AwsProvider(this, "Aws", {
       region: awsRegion.value,
       defaultTags: [
@@ -97,7 +99,7 @@ export class BaseStack extends TerraformStack {
       ],
     });
 
-    // module VPC généré via cdktf (terraform-aws-modules/vpc/aws)
+    // module VPC via terraform-aws-modules/vpc/aws
     const vpcModule = new Vpc(this, "vpc", {
       name: `${projectName.value}-vpc-${props.envName}`,
       cidr: vpcCidrBlock.value,
@@ -178,48 +180,50 @@ export class BaseStack extends TerraformStack {
       },
     });
 
-    // bucket S3 pour l’état terraform
-    const tfstateBucket = new S3Bucket(this, "tfstate", {
-      bucket: props.backendBucket,
-      tags: {
-        Name: `Terraform State Bucket - ${props.envName}`,
-        Environment: "Backend",
-        ManagedBy: "Terraform",
-      },
-    });
+    // si createBackendBucket=true -> on crée le bucket ; sinon on suppose qu'il existe déjà
+    if (props.createBackendBucket) {
+      const tfstateBucket = new S3Bucket(this, "tfstate", {
+        bucket: props.backendBucket,
+        tags: {
+          Name: `Terraform State Bucket - ${props.envName}`,
+          Environment: "Backend",
+          ManagedBy: "Terraform",
+        },
+      });
 
-    // activation du versioning sur le bucket
-    new s3BucketVersioning.S3BucketVersioningA(this, "tfstateVersioning", {
-      bucket: tfstateBucket.bucket,
-      versioningConfiguration: {
-        status: "Enabled",
-      },
-    });
-
-    // chiffrement SSE sur le bucket
-    new s3BucketServerSideEncryptionConfiguration.S3BucketServerSideEncryptionConfigurationA(
-      this,
-      "tfstateEncryption",
-      {
+      // versioning
+      new s3BucketVersioning.S3BucketVersioningA(this, "tfstateVersioning", {
         bucket: tfstateBucket.bucket,
-        rule: [
-          {
-            applyServerSideEncryptionByDefault: {
-              sseAlgorithm: "AES256",
-            },
-          },
-        ],
-      }
-    );
+        versioningConfiguration: {
+          status: "Enabled",
+        },
+      });
 
-    // blocage de l’accès public au bucket S3
-    new S3BucketPublicAccessBlock(this, "tfstatePublicAccessBlock", {
-      bucket: tfstateBucket.bucket,
-      blockPublicAcls: true,
-      blockPublicPolicy: true,
-      ignorePublicAcls: true,
-      restrictPublicBuckets: true,
-    });
+      // chiffrement SSE
+      new s3BucketServerSideEncryptionConfiguration.S3BucketServerSideEncryptionConfigurationA(
+        this,
+        "tfstateEncryption",
+        {
+          bucket: tfstateBucket.bucket,
+          rule: [
+            {
+              applyServerSideEncryptionByDefault: {
+                sseAlgorithm: "AES256",
+              },
+            },
+          ],
+        }
+      );
+
+      // blocage de l’accès public
+      new S3BucketPublicAccessBlock(this, "tfstatePublicAccessBlock", {
+        bucket: tfstateBucket.bucket,
+        blockPublicAcls: true,
+        blockPublicPolicy: true,
+        ignorePublicAcls: true,
+        restrictPublicBuckets: true,
+      });
+    }
 
     // outputs utiles
     new TerraformOutput(this, "vpc_id", {
@@ -231,13 +235,15 @@ export class BaseStack extends TerraformStack {
 
 const app = new App();
 
-// on récupère le workspace Terraform (dev ou prod)
+// récupérer le workspace Terraform (dev ou prod)
 const workspace = process.env.TF_WORKSPACE || "default";
 
-// on instancie une seule stack en fonction du workspace
+// on instancie la stack en réglant createBackendBucket à true uniquement la première fois
 new BaseStack(app, "stack", {
   envName: workspace,
   backendBucket: `mon-tfstate-bucket-projet1-unique-12345`,
+  createBackendBucket: false, // mettre à true pour la première exécution
+  // sinon, on suppose que le bucket existe déjà
 });
 
 app.synth();

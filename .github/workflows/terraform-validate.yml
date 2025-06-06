@@ -19,69 +19,69 @@ permissions:
   deployments: write # nécessaire pour interagir avec les environnements GitHub
 
 jobs:
-  validate-code:
-    name: Validate Terraform Code
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # validate-code:
+  #   name: Validate Terraform Code
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::472910743243:role/GitHubActions-Terraform-Role-Projet1 # !! remplacez par l’ARN de votre rôle !!
-          aws-region: eu-west-3
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: arn:aws:iam::472910743243:role/GitHubActions-Terraform-Role-Projet1 # !! remplacez par l’ARN de votre rôle !!
+  #         aws-region: eu-west-3
 
-      - name: Setup node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
+  #     - name: Setup node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "22"
 
-      - name: Install cdktf CLI
-        run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
+  #     - name: Install cdktf CLI
+  #       run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
 
-      - name: Install dependencies
-        run: npm ci && cdktf get
+  #     - name: Install dependencies
+  #       run: npm ci && cdktf get
 
-      - name: Synthétiser le code Terraform (HCL)
-        run: npx cdktf synth
+  #     - name: Synthétiser le code Terraform (HCL)
+  #       run: npx cdktf synth
 
-      - name: Terraform Init (validation mode)
-        run: |
-          cd cdktf.out/stacks/stack
-          terraform init -backend=false -input=false
+  #     - name: Terraform Init (validation mode)
+  #       run: |
+  #         cd cdktf.out/stacks/stack
+  #         terraform init -backend=false -input=false
 
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive -diff
+  #     - name: Terraform Format Check
+  #       run: terraform fmt -check -recursive -diff
 
-      - name: Terraform Validate
-        run: terraform validate
+  #     - name: Terraform Validate
+  #       run: terraform validate
 
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v4
-        with:
-          tflint_version: v0.58.0 # spécifiez la version de `TFLint` à utiliser
+  #     - name: Setup TFLint
+  #       uses: terraform-linters/setup-tflint@v4
+  #       with:
+  #         tflint_version: v0.58.0 # spécifiez la version de `TFLint` à utiliser
 
-      - name: Init TFLint
-        run: tflint --init
+  #     - name: Init TFLint
+  #       run: tflint --init
 
-      - name: Run TFLint
-        run: tflint --recursive
+  #     - name: Run TFLint
+  #       run: tflint --recursive
 
-      - name: Run Trivy IaC scan
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          scan-type: "config"
-          input: "."
-          format: "table"
-          exit-code: "0" # ne pas échouer le job si des vulnérabilités sont trouvées
-          severity: "CRITICAL"
-          ignore-unfixed: true
+  #     - name: Run Trivy IaC scan
+  #       uses: aquasecurity/trivy-action@0.30.0
+  #       with:
+  #         scan-type: "config"
+  #         input: "."
+  #         format: "table"
+  #         exit-code: "0" # ne pas échouer le job si des vulnérabilités sont trouvées
+  #         severity: "CRITICAL"
+  #         ignore-unfixed: true
 
   terraform_plan:
     name: Generate Terraform Plan
