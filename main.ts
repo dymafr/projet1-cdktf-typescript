@@ -124,7 +124,7 @@ export class BaseStack extends TerraformStack {
 
     // security group pour autoriser le trafic HTTP entrant
     const httpIngress: SecurityGroupIngress = {
-      description: "http depuis n’importe où",
+      description: "http depuis n importe ou",
       fromPort: 80,
       toPort: 80,
       protocol: "tcp",
