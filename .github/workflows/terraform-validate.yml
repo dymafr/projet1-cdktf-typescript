@@ -235,7 +235,7 @@ jobs:
         run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci && cdkf get
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
@@ -310,7 +310,7 @@ jobs:
         run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci && cdkf get
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
