@@ -180,7 +180,7 @@ export class BaseStack extends TerraformStack {
 
     // bucket S3 pour l’état terraform
     const tfstateBucket = new S3Bucket(this, "tfstate", {
-      bucket: `mon-tfstate-bucket-projet1-${props.envName}-unique-12345`,
+      bucket: `mon-tfstate-bucket-projet1-unique-12345`,
       tags: {
         Name: `Terraform State Bucket - ${props.envName}`,
         Environment: "Backend",
