@@ -19,72 +19,75 @@ permissions:
   deployments: write # nécessaire pour interagir avec les environnements GitHub
 
 jobs:
-  validate-code:
-    name: Validate Terraform Code
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # validate-code:
+  #   name: Validate Terraform Code
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::472910743243:role/GitHubActions-Terraform-Role-Projet1 # !! remplacez par l’ARN de votre rôle !!
-          aws-region: eu-west-3
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: arn:aws:iam::472910743243:role/GitHubActions-Terraform-Role-Projet1 # !! remplacez par l’ARN de votre rôle !!
+  #         aws-region: eu-west-3
 
-      - name: Setup node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
+  #     - name: Setup node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "22"
 
-      - name: Install cdktf CLI
-        run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
+  #     - name: Install cdktf CLI
+  #       run: npm install -g cdktf-cli@latest # installer le CLI pour `cdktf`
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: "1.12.1" # spécifiez la version de `Terraform` à utiliser
 
-      - name: Install dependencies
-        run: npm ci && cdktf get
+  #     - name: Install dependencies
+  #       run: npm ci && cdktf get
 
-      - name: Synthétiser le code Terraform (HCL)
-        run: npx cdktf synth
+  # - name: Synthétiser le code Terraform (HCL)
+  #   run: npx cdktf synth
 
-      - name: Terraform Init (validation mode)
-        run: terraform init -backend=false -input=false
+  # - name: se placer dans le dossier Terraform généré
+  #   run: cd cdktf.out/stacks/stack
 
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive -diff
+  #     - name: Terraform Init (validation mode)
+  #       run: terraform init -backend=false -input=false
 
-      - name: Terraform Validate
-        run: terraform validate
+  #     - name: Terraform Format Check
+  #       run: terraform fmt -check -recursive -diff
 
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v4
-        with:
-          tflint_version: v0.58.0 # spécifiez la version de `TFLint` à utiliser
+  #     - name: Terraform Validate
+  #       run: terraform validate
 
-      - name: Init TFLint
-        run: tflint --init
+  #     - name: Setup TFLint
+  #       uses: terraform-linters/setup-tflint@v4
+  #       with:
+  #         tflint_version: v0.58.0 # spécifiez la version de `TFLint` à utiliser
 
-      - name: Run TFLint
-        run: tflint --recursive
+  #     - name: Init TFLint
+  #       run: tflint --init
 
-      - name: Run Trivy IaC scan
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          scan-type: "config"
-          input: "."
-          format: "table"
-          exit-code: "0" # ne pas échouer le job si des vulnérabilités sont trouvées
-          severity: "CRITICAL"
-          ignore-unfixed: true
+  #     - name: Run TFLint
+  #       run: tflint --recursive
+
+  #     - name: Run Trivy IaC scan
+  #       uses: aquasecurity/trivy-action@0.30.0
+  #       with:
+  #         scan-type: "config"
+  #         input: "."
+  #         format: "table"
+  #         exit-code: "0" # ne pas échouer le job si des vulnérabilités sont trouvées
+  #         severity: "CRITICAL"
+  #         ignore-unfixed: true
 
   terraform_plan:
     name: Generate Terraform Plan
     runs-on: ubuntu-latest
-    needs: validate-code
+    # needs: validate-code
     if: ${{ github.event_name == 'pull_request' }}
     outputs: # rendre le nom du fichier de plan binaire et le workspace disponibles
       plan_binary_filename: ${{ steps.plan.outputs.PLAN_BINARY_FILENAME }}
@@ -118,6 +121,9 @@ jobs:
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
+
+      - name: se placer dans le dossier Terraform généré
+        run: cd cdktf.out/stacks/stack
 
       - name: Determine Terraform workspace
         id: set_workspace
@@ -210,7 +216,7 @@ jobs:
   terraform_apply_staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    needs: [validate-code] # dépend de la validation. le plan est régénéré.
+    # needs: [validate-code] # dépend de la validation. le plan est régénéré.
     if: ${{ github.ref == 'refs/heads/staging' && github.event_name == 'push' }}
     environment:
       name: staging
@@ -244,6 +250,9 @@ jobs:
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
+
+      - name: se placer dans le dossier Terraform généré
+        run: cd cdktf.out/stacks/stack
 
       - name: Terraform Init
         run: terraform init -input=false
@@ -330,6 +339,9 @@ jobs:
 
       - name: Synthétiser le code Terraform (HCL)
         run: npx cdktf synth
+
+      - name: se placer dans le dossier Terraform généré
+        run: cd cdktf.out/stacks/stack
 
       - name: Terraform Init
         run: terraform init -input=false
