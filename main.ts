@@ -180,7 +180,7 @@ export class BaseStack extends TerraformStack {
 
     // bucket S3 pour l’état terraform
     const tfstateBucket = new S3Bucket(this, "tfstate", {
-      bucket: `mon-tfstate-bucket-projet1-unique-12345`,
+      bucket: props.backendBucket,
       tags: {
         Name: `Terraform State Bucket - ${props.envName}`,
         Environment: "Backend",
@@ -237,7 +237,7 @@ const workspace = process.env.TF_WORKSPACE || "default";
 // on instancie une seule stack en fonction du workspace
 new BaseStack(app, "stack", {
   envName: workspace,
-  backendBucket: `mon-tfstate-bucket-projet1-${workspace}-unique-12345`,
+  backendBucket: `mon-tfstate-bucket-projet1-unique-12345`,
 });
 
 app.synth();
