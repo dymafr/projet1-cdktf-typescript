@@ -92,6 +92,14 @@ jobs:
           fi
           echo "WORKSPACE=$WORKSPACE" >> $GITHUB_ENV
           echo "tf_workspace=$WORKSPACE" >> $GITHUB_OUTPUT
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm ci
+      - name: Synthétiser le code Terraform (HCL)
+        run: npx cdktf synth
       - name: Terraform Init (for plan)
         id: init_plan
         run: terraform init -input=false
