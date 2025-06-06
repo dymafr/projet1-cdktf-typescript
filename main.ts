@@ -158,7 +158,7 @@ export class BaseStack extends TerraformStack {
     });
 
     // instance EC2 pour le serveur web
-    new Instance(this, "webServer", {
+    const web = new Instance(this, "webServer", {
       ami: image.id,
       instanceType: props.envName === "prod" ? "t3.small" : "t2.micro",
       subnetId: premierPublicSubnetId,
@@ -182,7 +182,7 @@ export class BaseStack extends TerraformStack {
 
     new TerraformOutput(this, "web_server_public_ip", {
       description: "IP publique du serveur web",
-      value: Fn.element(["${aws_instance.webServer.public_ip}"], 0),
+      value: web.publicIp,
     });
 
     // si createBackendBucket=true -> on crée le bucket ; sinon on suppose qu'il existe déjà
