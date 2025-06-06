@@ -51,10 +51,9 @@ jobs:
   #     - name: Synthétiser le code Terraform (HCL)
   #       run: npx cdktf synth
 
-  #     - name: Terraform Init (validation mode)
-  #       run: |
-  #         cd cdktf.out/stacks/stack
-  #         terraform init -backend=false -input=false
+  # - name: Terraform Init (validation mode)
+  #   run:  terraform init -backend=false -input=false
+  #   working-directory: cdktf.out/stacks/stack
 
   #     - name: Terraform Format Check
   #       run: terraform fmt -check -recursive -diff
@@ -137,9 +136,8 @@ jobs:
 
       - name: Terraform Init (for plan)
         id: init_plan
-        run: |
-          cd cdktf.out/stacks/stack 
-          terraform init -input=false
+        run: terraform init -input=false
+        working-directory: cdktf.out/stacks/stack
 
       - name: Select Terraform workspace
         run: |
@@ -269,13 +267,13 @@ jobs:
       - name: Terraform Plan for Staging
         id: plan_staging
         run: |
-          cd cdktf.out/stacks/stack
           terraform plan -input=false -no-color -out=tfplan-staging.binary
           terraform show -no-color tfplan-staging.binary > tfplan-staging.txt
           if grep -q "resources to be destroyed" tfplan-staging.txt; then
             echo "::warning title=changements destructeurs détectés::le plan pour staging contient des destructions. vérification manuelle recommandée."
           fi
           echo "plan_file=tfplan-staging.binary" >> $GITHUB_OUTPUT
+        working-directory: cdktf.out/stacks/stack
 
       - name: Terraform Apply to Staging
         run: terraform apply -input=false ${{ steps.plan_staging.outputs.plan_file }}
@@ -298,6 +296,7 @@ jobs:
             echo "app_url=http://${APP_IP}" >> $GITHUB_OUTPUT
             echo "url de l’application (staging) : http://${APP_IP}"
           fi
+        working-directory: cdktf.out/stacks/stack
 
   terraform_apply_production:
     name: Deploy to Production
@@ -339,6 +338,7 @@ jobs:
 
       - name: Terraform Init
         run: terraform init -input=false
+        working-directory: cdktf.out/stacks/stack
 
       - name: Determine Terraform workspace
         id: set_workspace
